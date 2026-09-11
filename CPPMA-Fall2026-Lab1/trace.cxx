@@ -9,25 +9,25 @@
 #include <iostream>
 
 double **initialization(int);
-double *fill_vectors(double *, int);
+double *fill_vector(double *, int);
 void print_matrix(double **, int);
-double *trace(double **, int);
+double trace(double **, int);
 using std::cout;
 
 /// Driver principal pour le calcul de la tace d'une matrice
 int main() {
-  int i, j, n;
+  int i, n;
   double **matrix;
-  double *sum;
+  double sum;
 
-  cout << std::endl << "Enter the Dimension for a square matrix: " << flush;
-  cin >> n;
+  cout << std::endl << "Enter the Dimension for a square matrix: " << std::flush;
+  std::cin >> n;
   matrix = initialization(n);
   for (i = 1; i < n; i++)
-    matrix[i] = fill_vectors(matrix[i], n);
+    matrix[i] = fill_vector(matrix[i], n);
   sum = trace(matrix, n);
   print_matrix(matrix, n);
-  cout << endl << "Sum of the diagonal elements are: " << sum;
+  cout << std::endl << "Sum of the diagonal elements are: " << sum;
   return 0;
 }
 
@@ -39,9 +39,9 @@ int main() {
 double **initialization(int n) {
   int i;
   double **matrix;
-  matrix = calloc(n, sizeof(double **));
+  matrix = (double**)calloc(n, sizeof(double *));
   for (i = 0; i < n; ++i)
-    matrix[i] = calloc(n, sizeof(double *));
+    matrix[i] = (double*)calloc(n, sizeof(double));
   return (matrix);
 }
 
@@ -50,11 +50,11 @@ double **initialization(int n) {
 /// @param[in] vec est le vecteur à initialiser
 /// @param[in] n   est la taille du vecteur à initialiser
 /// @return    Renvoie le vecteur initialisé.
-double *fill_vector(double *vec, int n) {
+double* fill_vector(double* vec, int n) {
   int i;
   for (i = 0; i < n; i++)
     vec[i] = rand() % 20 - 10;
-  return &vec;
+  return vec;
 }
 
 /// @brief Affiche les éléments d'une matrice de taille n
@@ -65,17 +65,17 @@ void print_matrix(double **matrix, int n) {
   for (i = 0; i < n; i++) {
     for (j = 0; j < n; j++)
       cout << matrix[i][j] << ", ";
-    cout << endl;
+    cout << std::endl;
   }
 }
 
 /// @brief Calcul la trace d'une matrice
 /// @param[in] matrix est la matrice dont on souhaite connaître la trace.
 /// @param[in] n est la taille de la matrice.
-double *trace(double **matrix, int n) {
+double trace(double** matrix, int n) {
   int i;
   double sum = 0.0;
-  for (i = 1; i <= n; i++)
+  for (i = 0; i < n; i++)
     sum += matrix[i][i];
-  return &sum;
+  return sum;
 }

@@ -205,7 +205,7 @@ Demo_IS_TOP_LEVEL:STATIC=ON
 Demo_SOURCE_DIR:STATIC=/user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1
 
 //Compile with address/undefined sanitizers
-SANITIZE:BOOL=OFF
+SANITIZE:BOOL=ON
 
 
 ########################

@@ -1,0 +1,3 @@
+CMakeFiles/edo.dir/edo.cxx.o: \
+ /user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1/edo.cxx \
+ /usr/include/stdc-predef.h
