@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wall -Wextra -g -Wl,--dependency-file=CMakeFiles/edo.dir/link.d CMakeFiles/edo.dir/edo.cxx.o -o edo
