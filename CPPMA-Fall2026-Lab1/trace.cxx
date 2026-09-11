@@ -28,6 +28,10 @@ int main() {
   sum = trace(matrix, n);
   print_matrix(matrix, n);
   cout << std::endl << "Sum of the diagonal elements are: " << sum;
+  
+  for (i = 0; i < n; i++)
+    free(matrix[i]);
+  free(matrix);
   return 0;
 }
 
