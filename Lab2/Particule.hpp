@@ -1,100 +1,61 @@
+#ifndef PARTICULE_HPP
+#define PARTICULE_HPP
+
+#include "vector.hpp"
+
 class Particule {
-        private:
-        double x, y, z;
-        double vx, v, vz;
-        double masse;
-        int id;
-        int type;
-        double fx, fy, fz;
-        
+private:
+    Vector position;
+    Vector vitesse;
+    double masse;
+    int id;
+    int type;
+    Vector force;
 
-        public:
-        // constructeur
-        Particule(double masse); 
-        Particule(double x, double y, double z,
-                double vx, double vy, double vz,
-                double masse, int id, int type,
-                double fx, double fy, double fz)
-                : x(x), y(y), z(z),
-                vx(vx), vy(vy), 
-                vz(vz),masse(masse),
-                {}
+public:
+    // Constructeur
+    Particule(double masse)
+        : position(0, 0, 0), vitesse(0, 0, 0), masse(masse),
+          id(0), type(0), force(0, 0, 0) {}
 
-        double getMasse() const { return masse; }
-        void setMasse(double m) { masse = m; }
+    Particule(double x, double y, double z,
+              double vx, double vy, double vz,
+              double masse, int id, int type,
+              double fx, double fy, double fz)
+        : position(x, y, z), vitesse(vx, vy, vz), masse(masse),
+          id(id), type(type), force(fx, fy, fz) {}
 
-        int getId() const { return id; }
-        void setId(int i) { id = i; }
+    double getMasse() const { return masse; }
+    void setMasse(double m) { masse = m; }
 
-        int getType() const { return type; }
-        void setType(int t) { type = t; }
+    int getId() const { return id; }
+    void setId(int i) { id = i; }
 
-        double getX() const { return x; }
-        double getY() const { return y; }
-        double getZ() const { return z; }
+    int getType() const { return type; }
+    void setType(int t) { type = t; }
 
-        double getVx() const { return vx; }
-        double getVy() const { return vy; }
-        double getVz() const { return vz; }
+    // Accesseurs vectoriels
+    const Vector& getPosition() const { return position; }
+    void setPosition(const Vector& p) { position = p; }
 
-        double getFx() const { return fx; }
-        double getFy() const { return fy; }
-        double getFz() const { return fz; }
+    const Vector& getVitesse() const { return vitesse; }
+    void setVitesse(const Vector& v) { vitesse = v; }
 
+    const Vector& getForce() const { return force; }
+    void setForce(const Vector& f) { force = f; }
 
-        void setX(double x) { this->x = x; }
-        void setY(double y) { this->y = y; }
-        void setZ(double z) { this->z = z; }
+    // Accesseurs par composante, conserves pour compatibilite
+    double getX() const { return position.getX(); }
+    double getY() const { return position.getY(); }
+    double getZ() const { return position.getZ(); }
 
-        void setVx(double vx) { this->vx = vx; }
-        void setVy(double vy) { this->vy = vy; }
-        void setVz(double vz) { this->vz = vz; }
+    double getVx() const { return vitesse.getX(); }
+    double getVy() const { return vitesse.getY(); }
+    double getVz() const { return vitesse.getZ(); }
 
-        void setFx(double fx) { this->fx = fx; }
-        void setFy(double fy) { this->fy = fy; }
-        void setFz(double fz) { this->fz = fz; }
+    double getFx() const { return force.getX(); }
+    double getFy() const { return force.getY(); }
+    double getFz() const { return force.getZ(); }
+};
 
-
-        double gravitational_force_ij(const std::vector<Particule>& particules_vector, int i, int j, 
-                                        double dx, double dy, double dz){ // calcul de force
-
-                double r = std::sqrt(dx*dx + dy*dy + dz*dz);
-
-                return particules_vector[i].getMasse() * particules_vector[j].getMasse()
-                                                        / (r*r*r);
-                
-        }
-
-        double gravitational_force_ij(const std::vector<Particule>& particules_vector, int i, int j){
-
-                double dx = particules_vector[j].getX() - particules_vector[i].getX();
-                double dy = particules_vector[j].getY() - particules_vector[i].getY();
-                double dz = particules_vector[j].getZ() - particules_vector[i].getZ();
-
-                return gravitational_force_ij(particules_vector, i, j, dx, dy, dz);
-        }
-
-
-        void renew_gravitational_force_dxdydz_i(std::vector<Particule>& particules_vector, int i){
-                
-                for (int j = i + 1; j < particules_vector.size(); ++j) {
-
-                        double dx = particules_vector[j].getX() - particules_vector[i].getX();
-                        double dy = particules_vector[j].getY() - particules_vector[i].getY();
-                        double dz = particules_vector[j].getZ() - particules_vector[i].getZ();
-
-                        double F_ij = gravitational_force_ij(particules_vector, i, j, dx, dy, dz);
-
-                        // Fij
-                        particules_vector[i].setFx(particules_vector[i].getFx() + F_ij * dx);
-                        particules_vector[i].setFy(particules_vector[i].getFy() + F_ij * dy);
-                        particules_vector[i].setFz(particules_vector[i].getFz() + F_ij * dz);
-
-                        // Fji = -Fij
-                        particules_vector[j].setFx(particules_vector[j].getFx() - F_ij * dx);
-                        particules_vector[j].setFy(particules_vector[j].getFy() - F_ij * dy);
-                        particules_vector[j].setFz(particules_vector[j].getFz() - F_ij * dz);
-                }
-
-        }
-    };
+#endif // PARTICULE_HPP
