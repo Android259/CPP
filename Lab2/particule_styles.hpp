@@ -1,7 +1,7 @@
 #ifndef PARTICULE_STYLES_HPP
 #define PARTICULE_STYLES_HPP
  
-#include "Vector.hpp"
+#include "vector.hpp"
 #include <array>
 #include <vector>
  
