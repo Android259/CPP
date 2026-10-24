@@ -1,13 +1,14 @@
 #ifndef PARTICULE_HPP
 #define PARTICULE_HPP
 
-#include "vector.hpp"
+#include "../include/Vector.hpp"
 
 class Particule {
 private:
     Vector position;
     Vector vitesse;
     double masse;
+    double invMasse; // = 1.0 / masse, mise en cache pour eviter de diviser par masse a chaque pas de temps
     int id;
     int type;
     Vector force;
@@ -15,18 +16,22 @@ private:
 public:
     // Constructeur
     Particule(double masse)
-        : position(0, 0, 0), vitesse(0, 0, 0), masse(masse),
+        : position(0, 0, 0), vitesse(0, 0, 0), masse(masse), invMasse(1.0 / masse),
           id(0), type(0), force(0, 0, 0) {}
 
     Particule(double x, double y, double z,
               double vx, double vy, double vz,
               double masse, int id, int type,
               double fx, double fy, double fz)
-        : position(x, y, z), vitesse(vx, vy, vz), masse(masse),
+        : position(x, y, z), vitesse(vx, vy, vz), masse(masse), invMasse(1.0 / masse),
           id(id), type(type), force(fx, fy, fz) {}
 
     double getMasse() const { return masse; }
-    void setMasse(double m) { masse = m; }
+    void setMasse(double m) { masse = m; invMasse = 1.0 / m; }
+
+    // 1.0 / masse, deja calcule : a utiliser (multiplier) a la place d'une
+    // division par masse dans les boucles de simulation.
+    double getInvMasse() const { return invMasse; }
 
     int getId() const { return id; }
     void setId(int i) { id = i; }

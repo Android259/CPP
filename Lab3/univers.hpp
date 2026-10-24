@@ -1,2 +1,0 @@
-#ifndef UNIVERS_HPP
-#define UNIVERS_HPP
