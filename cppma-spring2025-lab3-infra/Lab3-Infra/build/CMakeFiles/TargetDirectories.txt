@@ -1,0 +1,10 @@
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/CMakeFiles/edit_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/CMakeFiles/rebuild_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/src/CMakeFiles/edit_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/src/CMakeFiles/rebuild_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/test/CMakeFiles/test_1.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/test/CMakeFiles/edit_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/test/CMakeFiles/rebuild_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/demo/CMakeFiles/demo_univers.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/demo/CMakeFiles/edit_cache.dir
+/home/andrei/CPP/cppma-spring2025-lab3-infra/Lab3-Infra/build/demo/CMakeFiles/rebuild_cache.dir
