@@ -55,22 +55,10 @@ int main() {
     // ---- Question 6 : l'univers demande, (2^5)^3 particules ----
     const unsigned cote = 1u << 5; // 2^5 = 32 particules par axe
     Univers univers = genererCube(5);
-    univers.initialiserCellules();
 
     std::printf("Question 6 : univers genere, %d particules sur une grille %u x %u x %u\n",
                 univers.getNombreParticules(), cote, cote, cote);
     std::printf("Pas entre particules : %.6f\n", 1.0/(cote - 1));
-    std::printf("Grille de cellules : %d x %d x %d\n",
-                univers.getNombreCellules(0), univers.getNombreCellules(1),
-                univers.getNombreCellules(2));
-
-    std::size_t occupees = 0, particulesPlacees = 0;
-    for (const auto& cellule : univers.getCellules()) {
-        if (cellule.taille() > 0) ++occupees;
-        particulesPlacees += cellule.taille();
-    }
-    std::printf("Cellules occupees : %zu / %zu, particules placees : %zu\n",
-                occupees, univers.getCellules().size(), particulesPlacees);
 
     // ---- Question 7 : performance de la construction ----
     std::printf("\nQuestion 7 : insertion des particules dans le conteneur\n");

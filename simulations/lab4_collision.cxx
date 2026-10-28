@@ -82,19 +82,6 @@ int main() {
         if (pasCourant % pasParFrame == 0) {
             std::snprintf(nomFichier, sizeof(nomFichier), "frames/collision_%04u.vtu", numeroFrame++);
             univers.sauvegarderVTK(nomFichier);
-
-            // Suivi de l'evolution : boite englobante et vitesse moyenne.
-            double xMin = L1, xMax = 0.0, yMin = L2, yMax = 0.0, vitesseMoyenne = 0.0;
-            for (const auto& p : univers.getParticules()) {
-                if (p.getX() < xMin) xMin = p.getX();
-                if (p.getX() > xMax) xMax = p.getX();
-                if (p.getY() < yMin) yMin = p.getY();
-                if (p.getY() > yMax) yMax = p.getY();
-                vitesseMoyenne += p.getVitesse().norm();
-            }
-            vitesseMoyenne /= N;
-            std::printf("t = %7.3f  boite = [%7.2f, %7.2f] x [%7.2f, %7.2f]  |v|moy = %7.3f\n",
-                        pasCourant*dt, xMin, xMax, yMin, yMax, vitesseMoyenne);
         }
     }
 
