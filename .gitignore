@@ -1,0 +1,12 @@
+# Repertoires de compilation
+build/
+builder/
+
+# Sorties des simulations
+frames/
+*.vtu
+systeme_solaire.txt
+potentiel_lj.txt
+
+# Fichiers de profilage
+gmon.out

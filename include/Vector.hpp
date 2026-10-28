@@ -49,6 +49,12 @@ public:
     double getY() const { return y; }
     double getZ() const { return z; }
 
+    // Acces indexe (0=x, 1=y, 2=z), pour le code generique en dimension
+    // (boucles for d in [0, dimension) sur les axes, cf. Univers).
+    double operator[](int i) const {
+        return i == 0 ? x : (i == 1 ? y : z);
+    }
+
     // Addition en place : ajoute 'autre' a ce vecteur.
     Vector& operator+=(const Vector& autre) {
         x += autre.x; y += autre.y; z += autre.z;
@@ -80,7 +86,7 @@ public:
 
     // Norme euclidienne du vecteur.
     double norm() const {
-        return std::sqrt(x * x + y * y + z * z);
+        return std::sqrt(x*x + y*y + z*z);
     }
 
     // Operateurs arithmetiques binaires (+, -, *, / entre vecteur et scalaire).
@@ -104,7 +110,7 @@ public:
 
     // Produit scalaire.
     double operator*(const Vector& autre) const {
-        return x * autre.x + y * autre.y + z * autre.z;
+        return x*autre.x + y*autre.y + z*autre.z;
     }
 
     // Affichage sous la forme "(x, y, z)".

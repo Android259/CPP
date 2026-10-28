@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall CMakeFiles/test_1.dir/test_1.cxx.o -o test_1 

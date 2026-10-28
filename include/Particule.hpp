@@ -36,6 +36,10 @@ public:
     int getId() const { return id; }
     void setId(int i) { id = i; }
 
+    // Ordre sur les particules : par identifiant. Permet de ranger des
+    // particules dans un std::set, qui exige un ordre sur ses elements.
+    bool operator<(const Particule& autre) const { return id < autre.id; }
+
     int getType() const { return type; }
     void setType(int t) { type = t; }
 
@@ -48,6 +52,10 @@ public:
 
     const Vector& getForce() const { return force; }
     void setForce(const Vector& f) { force = f; }
+
+    // Ajoute f a la force courante, sans passer par getForce()+setForce()
+    // (evite de construire une copie intermediaire du vecteur force).
+    void ajouterForce(const Vector& f) { force += f; }
 
     // Accesseurs par composante, conserves pour compatibilite
     double getX() const { return position.getX(); }

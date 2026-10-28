@@ -1,4 +1,0 @@
-/user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1/builder/CMakeFiles/exe.dir
-/user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1/builder/CMakeFiles/edo.dir
-/user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1/builder/CMakeFiles/edit_cache.dir
-/user/8/kalinina/Downloads/cppma-fall2026-lab1/CPPMA-Fall2026-Lab1/builder/CMakeFiles/rebuild_cache.dir
