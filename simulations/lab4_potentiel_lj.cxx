@@ -10,8 +10,6 @@
 //
 // La gravitation est toujours attractive : toutes les paires
 // comptent, d'ou O(n^2). 
-// Lennard-Jones tombant en 1/r^7, au-dela de quelques sigma on peut l'ignorer, 
-// ce qui justifie rayonCoupure et le decoupage en cellules.
 
 #include <cmath>
 #include <cstdio>
