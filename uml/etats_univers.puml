@@ -1,0 +1,45 @@
+@startuml etats_univers
+title Diagramme de transitions - cycle de vie de Univers<Dim>
+
+[*] --> NonInitialise : <<create>>\nUnivers(...)
+
+note right of NonInitialise
+  Particules placees (positions initiales
+  ou nulles), mais aucune particule
+  n'est encore associee a une cellule
+  de la grille.
+end note
+
+state "Forces gravitationnelles a jour" as Grav
+state "Cellules pretes" as Cell
+state "Forces de Lennard-Jones a jour" as LJ
+
+NonInitialise -left-> Grav : recalculerForces()
+Grav -left-> Grav : avancer(dt)
+
+note bottom of Grav
+  avancer(dt) repositionne les
+  particules puis recalcule la
+  gravite en interne.
+end note
+
+NonInitialise -right-> Cell : initialiserCellules()
+Cell -down-> LJ : recalculerForcesLennardJones()
+LJ -right-> LJ : avancerLennardJones(dt)
+
+note bottom of LJ
+  avancerLennardJones(dt) repositionne,
+  met a jour les cellules puis recalcule
+  les forces de Lennard-Jones en interne.
+end note
+
+note right of LJ
+  sauvegarderVTK() peut etre appelee
+  depuis cet etat (methode const,
+  ne modifie pas l'etat de Univers).
+end note
+
+Grav -left-> [*]
+LJ -right-> [*]
+
+@enduml

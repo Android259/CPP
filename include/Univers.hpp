@@ -13,7 +13,7 @@
 
 // Univers : une collection de particules evoluant par interaction gravitationnelle
 // ou de Lennard-Jones, dans un espace de dimension Dim fixee a la compilation
-// (1, 2 ou 3, voire plus : rien dans l'implementation ne suppose Dim <= 3).
+
 template <std::size_t Dim>
 class Univers {
 private:
@@ -22,14 +22,14 @@ private:
 
     // Contraintes physiques de l'univers (Question 2) :
     std::array<double, Dim> longueursCaracteristiques; // L_d, une valeur par dimension (taille de la boite)
-    double rayonCoupure;// dehors, le potentiel est negligeable
+    double rayonCoupure;// dehors - le potentiel est negligeable
     double epsilon;// profondeur du potentiel de Lennard-Jones
     double sigma;// echelle de longueur du potentiel de Lennard-Jones
     double rayonCoupureCarre; // = rayonCoupure^2, mis en cache (evite de le recalculer a chaque paire dans ajouterForceLennardJones)
-    double sigmaCarre;        // = sigma^2, mis en cache (meme raison)
+    double sigmaCarre; // = sigma^2, mis en cache (meme raison)
 
     // Grille tensorielle de cellules (Question 3), classe technique separee
-    // (cf. Cours 05 - architecture en couches / forte cohesion) :
+    // (Cours 05 - architecture en couches / forte cohesion) :
     GrilleCellules<Dim> grille;
 
     // Calcule la force gravitationnelle entre i et j et l'accumule dans

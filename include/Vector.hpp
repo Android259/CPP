@@ -9,9 +9,6 @@
 #include <iostream>
 
 // Vecteur a Dim composantes avec les operations arithmetiques de base.
-// Dim est fixe a la compilation (contrairement a l'ancienne version 3D fixe
-// pilotee par un "dimension" runtime dans Univers/GrilleCellules) : un
-// Vector<1> n'a reellement qu'une composante, etc.
 template <std::size_t Dim>
 class Vector {
 private:
@@ -39,8 +36,6 @@ public:
     // Acces indexe en lecture (0 = premier axe, ..., Dim-1 = dernier axe).
     double operator[](std::size_t i) const { return data[i]; }
 
-    // Accesseurs par composante usuels, valables pour Dim >= 1/2/3 respectivement
-    // (conserves pour compatibilite avec le cas 3D, le cas le plus frequent).
     double getX() const { return data[0]; }
     double getY() const { return data[1]; }
     double getZ() const { return data[2]; }

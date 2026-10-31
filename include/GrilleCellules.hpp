@@ -14,11 +14,6 @@
 // proches lors du calcul d'un potentiel a courte portee (Question 3/4 lab4).
 // Classe technique (cf. Cours 05) : independante de la physique, separee de
 // Univers pour que chacune garde un objectif clair (forte cohesion).
-// Dim est fixe a la compilation : les tableaux par axe (nombreCellules,
-// tailleCellule, longueursCaracteristiques, coordonnees de cellule) sont des
-// std::array<_, Dim> plutot que des std::vector, pas d'allocation ni
-// d'indirection sur le tas (cf. coordonneeCellule/indiceLineaire, appeles a
-// chaque particule, a chaque pas).
 template <std::size_t Dim>
 class GrilleCellules {
 private:

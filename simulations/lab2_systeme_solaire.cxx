@@ -39,7 +39,7 @@ int main() {
     // particule est construite directement avec ses propres valeurs (masse,
     // position, vitesse) : pas de corps "generique" a corriger ensuite.
     std::vector<Particule<2>> corps = {
-        Particule<2>(1.0, Vector<2>({0.0, 0.0}), Vector<2>({0.0, 0.0}), Vector<2>(), 0, 0),      // Soleil
+        Particule<2>(1.0, Vector<2>({0.0, 0.0}), Vector<2>({0.0, 0.0}), Vector<2>(), 0, 0), // Soleil
         Particule<2>(3.0e-6, Vector<2>({0.0, 1.0}), Vector<2>({-1.0, 0.0}), Vector<2>(), 1, 0),  // Terre
         Particule<2>(9.55e-4, Vector<2>({0.0, 5.36}), Vector<2>({-0.425, 0.0}), Vector<2>(), 2, 0), // Jupiter
         Particule<2>(1.0e-14, Vector<2>({34.75, 0.0}), Vector<2>({0.0, 0.0296}), Vector<2>(), 3, 0) // Halley
@@ -49,7 +49,7 @@ int main() {
 
     const std::vector<std::string> noms = {"Soleil", "Terre", "Jupiter", "Halley"};
     std::ofstream fichier("systeme_solaire.txt");
-    fichier << std::fixed;  // pas de notation scientifique
+    fichier << std::fixed;
     fichier.precision(6);
 
     univers.recalculerForces(); // forces initiales, avant la boucle en temps

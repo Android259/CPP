@@ -52,7 +52,7 @@ Univers<3> genererCube(unsigned k) {
 }
 
 int main() {
-    // ---- Question 6 : l'univers demande, (2^5)^3 particules ----
+    // Question 6 : l'univers demande, (2^5)^3 particules
     const unsigned cote = 1u << 5; // 2^5 = 32 particules par axe
     Univers<3> univers = genererCube(5);
 
@@ -60,7 +60,7 @@ int main() {
                 univers.getNombreParticules(), cote, cote, cote);
     std::printf("Pas entre particules : %.6f\n", 1.0/(cote - 1));
 
-    // ---- Question 7 : performance de la construction ----
+    // Question 7 : performance de la construction
     std::printf("\nQuestion 7 : insertion des particules dans le conteneur\n");
     std::printf("   k        n     insertion\n");
     for (unsigned k = 3; k <= 7; ++k) {
@@ -71,9 +71,9 @@ int main() {
         std::printf("%4u %8u  %9.4f s\n", k, n, t);
     }
 
-    // ---- Question 8 : performance du calcul des interactions ----
+    // Question 8 : performance du calcul des interactions
     // Le cout est en O(n^2) : on mesure jusqu'a k = 5 puis on extrapole, les
-    // tailles superieures demandant des heures de calcul.
+    // tailles superieures demandent des heures de calcul.
     std::printf("\nQuestion 8 : calcul des interactions (recalculerForces, O(n^2))\n");
     std::printf("   k        n        temps        paires\n");
     unsigned nReference = 0;

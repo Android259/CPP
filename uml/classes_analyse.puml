@@ -1,0 +1,52 @@
+@startuml classes_analyse
+title Diagramme de classes d'analyse - systeme de simulation de particules
+footer Niveau analyse (Cours 05, p.30/38) : attributs non types, pas d'operations
+
+class Vector {
+  - coordonnees
+}
+
+class Particule {
+  - position
+  - vitesse
+  - force
+  - masse
+  - identifiant
+  - type
+}
+
+class Cellule {
+  - particules
+}
+
+class GrilleCellules {
+  - cellules
+  - taille des cellules
+  - nombre de cellules par axe
+}
+
+class Univers {
+  - particules
+  - longueurs caracteristiques
+  - rayon de coupure
+  - epsilon
+  - sigma
+}
+
+class ExportateurVTK {
+  - nomFichier
+}
+
+Particule "1" *-- "3" Vector : position, vitesse, force
+
+Univers "1" *-- "0..*" Particule : contient
+Univers "1" *-- "1" GrilleCellules : contient
+GrilleCellules "1" *-- "1..*" Cellule : contient
+
+Cellule "0..1" --> "0..*" Particule : reference (indices)
+GrilleCellules ..> Vector : utilise (positions)
+
+Univers ..> ExportateurVTK : utilise (sauvegarde)
+ExportateurVTK ..> Particule : depend de
+
+@enduml

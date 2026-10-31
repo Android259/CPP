@@ -10,8 +10,7 @@
 // ExportateurVTK : serialise une liste de particules au format VTK XML
 // UnstructuredGrid (.vtu), visualisable avec Paraview ou Visit (Question 3,
 // Visualisation). Classe utilitaire separee de Univers : la serialisation
-// est une preoccupation d'infrastructure (E/S), pas de domaine physique
-// (cf. Cours 05 - architecture en couches).
+// est une preoccupation d'infrastructure (E/S), pas de domaine physique.
 class ExportateurVTK {
 public:
     template <std::size_t Dim>

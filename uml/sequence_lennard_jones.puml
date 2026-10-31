@@ -1,0 +1,75 @@
+@startuml sequence_lennard_jones
+title Diagramme de sequence - Simulation de collision (Lennard-Jones, lab4_collision.cxx)
+
+actor Utilisateur as U
+participant "main" as Main
+participant "u : Univers<2>" as Uv
+participant "grille : GrilleCellules<2>" as Gr
+participant "c : Cellule" as Ce
+participant "p : Particule<2>" as P
+participant "ExportateurVTK" as Ex
+
+U -> Main : lancer lab4_collision
+
+Main -> Uv : Univers(listeParticules, L, rcoup, epsilon, sigma)
+activate Uv
+Uv -> Gr : GrilleCellules(L, rcoup)
+activate Gr
+Gr --> Uv : grille construite\n(topologie + voisinage precalcules)
+deactivate Gr
+deactivate Uv
+
+Main -> Uv : initialiserCellules()
+activate Uv
+Uv -> Gr : placerParticules(particules)
+activate Gr
+Gr -> Ce : ajouterParticule(indice)
+deactivate Gr
+deactivate Uv
+
+Main -> Uv : recalculerForcesLennardJones()
+activate Uv
+Uv -> Gr : getCellules() / voisinsDe(iCell)
+Uv -> P : ajouterForce(f)
+deactivate Uv
+
+Main -> Uv : sauvegarderVTK("frames/collision_0000.vtu")
+activate Uv
+Uv -> Ex : exporter(particules, nomFichier)
+deactivate Uv
+
+loop pasCourant = 1 .. nombrePas (390000 pas)
+  Main -> Uv : avancerLennardJones(dt)
+  activate Uv
+
+  Uv -> P : getForce() / setPosition(nouvellePosition)
+  note right : integration Stormer-Verlet\n(positions, a partir de F(t))
+
+  Uv -> Uv : mettreAJourCellules()
+  Uv -> Gr : mettreAJour(particules)
+  activate Gr
+  Gr -> Ce : retirerParticule(i) / ajouterParticule(i)
+  note right : seulement si la particule\na change de cellule
+  deactivate Gr
+
+  Uv -> Uv : recalculerForcesLennardJones()
+  Uv -> Gr : voisinsDe(iCell)
+  Uv -> P : ajouterForce(f)
+  note right : seulement les paires\nde cellules voisines
+
+  Uv -> P : setVitesse(nouvelleVitesse)
+  note right : integration Stormer-Verlet\n(vitesses, a partir de F(t) et F(t+dt))
+
+  deactivate Uv
+
+  alt pasCourant % pasParFrame == 0
+    Main -> Uv : sauvegarderVTK("frames/collision_NNNN.vtu")
+    activate Uv
+    Uv -> Ex : exporter(particules, nomFichier)
+    deactivate Uv
+  end
+end
+
+Main --> U : "Simulation terminee : 101 frames\ndans frames/"
+
+@enduml

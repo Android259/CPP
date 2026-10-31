@@ -1,0 +1,47 @@
+@startuml cas_utilisation
+title Diagramme de cas d'utilisation - Simulation de particules (Univers<Dim>)
+
+left to right direction
+skinparam packageStyle rect
+
+actor "Utilisateur" as U
+actor "Paraview / Visit" as PV
+
+rectangle "Systeme de simulation" {
+  usecase "Lancer une simulation\ngravitationnelle\n(sans grille de cellules)" as UC1
+  usecase "Lancer une simulation de\ncollision par potentiel\nde Lennard-Jones\n(avec grille de cellules)" as UC2
+  usecase "Calculer et exporter le\npotentiel de Lennard-Jones\n(potentiel_lj.txt)" as UC3
+  usecase "Exporter l'etat de\nl'univers au format VTK\n(.vtu)" as UC4
+  usecase "Visualiser les resultats" as UC5
+  usecase "Executer les tests\nunitaires (gtest)" as UC6
+  usecase "Comparer les performances\ndes conteneurs\n(benchmark)" as UC7
+}
+
+U --> UC1
+U --> UC2
+U --> UC3
+U --> UC6
+U --> UC7
+
+UC2 ..> UC4 : <<include>>
+UC4 <.. PV : lit les fichiers .vtu
+U --> UC5
+UC5 ..> PV : <<include>>
+
+note right of UC1
+  Univers::recalculerForces() + avancer(dt)
+  (lab2_systeme_solaire, lab3_univers_cube)
+end note
+
+note right of UC2
+  Univers::initialiserCellules() +
+  avancerLennardJones(dt)
+  (lab4_collision)
+end note
+
+note right of UC4
+  Univers::sauvegarderVTK()
+  -> ExportateurVTK::exporter()
+end note
+
+@enduml
