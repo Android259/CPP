@@ -30,20 +30,20 @@ double secondesDepuis(std::chrono::steady_clock::time_point debut) {
 
 // Univers de (2^k)^3 particules placees sur une grille reguliere du cube
 // unitaire. Les extremites 0 et 1 sont incluses, d'ou le pas 1/(cote - 1).
-Univers genererCube(unsigned k) {
+Univers<3> genererCube(unsigned k) {
     const unsigned cote = 1u << k;
     const unsigned n = cote*cote*cote;
 
     // Boite unitaire : L = 1 dans les trois directions.
-    Univers univers(3, static_cast<int>(n), 1.0, Vector(0, 0, 0),
-                    std::vector<double>{1.0, 1.0, 1.0}, 1.0, 1.0, 1.0);
+    Univers<3> univers(static_cast<int>(n), 1.0, Vector<3>(),
+                    std::array<double, 3>{1.0, 1.0, 1.0}, 1.0, 1.0, 1.0);
 
     const double pas = 1.0/(cote - 1);
     std::size_t indice = 0;
     for (unsigned i = 0; i < cote; ++i) {
         for (unsigned j = 0; j < cote; ++j) {
             for (unsigned l = 0; l < cote; ++l) {
-                univers.setPosition(indice, Vector(i*pas, j*pas, l*pas));
+                univers.setPosition(indice, Vector<3>({i*pas, j*pas, l*pas}));
                 ++indice;
             }
         }
@@ -54,7 +54,7 @@ Univers genererCube(unsigned k) {
 int main() {
     // ---- Question 6 : l'univers demande, (2^5)^3 particules ----
     const unsigned cote = 1u << 5; // 2^5 = 32 particules par axe
-    Univers univers = genererCube(5);
+    Univers<3> univers = genererCube(5);
 
     std::printf("Question 6 : univers genere, %d particules sur une grille %u x %u x %u\n",
                 univers.getNombreParticules(), cote, cote, cote);
@@ -66,7 +66,7 @@ int main() {
     for (unsigned k = 3; k <= 7; ++k) {
         const unsigned n = (1u << k)*(1u << k)*(1u << k);
         auto debut = std::chrono::steady_clock::now();
-        Univers u = genererCube(k);
+        Univers<3> u = genererCube(k);
         double t = secondesDepuis(debut);
         std::printf("%4u %8u  %9.4f s\n", k, n, t);
     }
@@ -80,7 +80,7 @@ int main() {
     double tReference = 0.0;
     for (unsigned k = 3; k <= 5; ++k) {
         const unsigned n = (1u << k)*(1u << k)*(1u << k);
-        Univers u = genererCube(k);
+        Univers<3> u = genererCube(k);
 
         auto debut = std::chrono::steady_clock::now();
         u.recalculerForces();

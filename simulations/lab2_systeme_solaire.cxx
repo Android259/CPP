@@ -1,7 +1,10 @@
 // Lab 2, Q4-Q6 : Soleil, Terre, Jupiter et Halley integres par Stormer-Verlet,
-// trajectoires sauvegardees dans un fichier texte. 
-// Unites : G = 1, masse du Soleil = 1, distance Terre-Soleil = 1, 
+// trajectoires sauvegardees dans un fichier texte.
+// Unites : G = 1, masse du Soleil = 1, distance Terre-Soleil = 1,
 // dt = 0.015, t_end = 468.5.
+//
+// Orbites planaires : Dim = 2 (toutes les positions/vitesses de l'enonce ont
+// une composante z nulle, l'univers est donc reellement a 2 dimensions).
 
 // Q5 : la periode de la Terre doit valoir 2*pi, car son orbite a un rayon et
 // une vitesse de 1 dans les unites de l'enonce.
@@ -14,16 +17,16 @@
 #include <vector>
 
 // Question 6 : ecrit une ligne par pas de temps, avec la position de chaque
-// astre, sous la forme "t=0.015  Terre = <-0.015, 0.999888, 0.000000>".
+// astre, sous la forme "t=0.015  Terre = <-0.015, 0.999888>".
 // Les coordonnees passent par les accesseurs de Particule, comme demande.
 void ecrireLigne(std::ofstream& fichier, double t,
-                 const std::vector<Particule>& particules,
+                 const std::vector<Particule<2>>& particules,
                  const std::vector<std::string>& noms) {
     fichier << "t=" << t;
     for (std::size_t i = 0; i < particules.size(); ++i) {
-        const Particule& p = particules[i];
+        const Particule<2>& p = particules[i];
         fichier << "  " << noms[i] << " = <"
-                << p.getX() << ", " << p.getY() << ", " << p.getZ() << ">";
+                << p.getX() << ", " << p.getY() << ">";
     }
     fichier << "\n";
 }
@@ -35,21 +38,21 @@ int main() {
     // Quatre corps, masses et etats initiaux donnes par l'enonce.
     const int nombreCorps = 4;
     const double masses[nombreCorps] = {1.0, 3.0e-6, 9.55e-4, 1.0e-14};
-    const Vector positions[nombreCorps] = {
-        Vector(0.0, 0.0, 0.0),// Soleil
-        Vector(0.0, 1.0, 0.0),// Terre
-        Vector(0.0, 5.36, 0.0),// Jupiter
-        Vector(34.75, 0.0, 0.0)// Halley
+    const Vector<2> positions[nombreCorps] = {
+        Vector<2>({0.0, 0.0}),// Soleil
+        Vector<2>({0.0, 1.0}),// Terre
+        Vector<2>({0.0, 5.36}),// Jupiter
+        Vector<2>({34.75, 0.0})// Halley
     };
-    const Vector vitesses[nombreCorps] = {
-        Vector(0.0, 0.0, 0.0),// Soleil
-        Vector(-1.0, 0.0, 0.0),// Terre
-        Vector(-0.425, 0.0, 0.0),// Jupiter
-        Vector(0.0, 0.0296, 0.0)// Halley
+    const Vector<2> vitesses[nombreCorps] = {
+        Vector<2>({0.0, 0.0}),// Soleil
+        Vector<2>({-1.0, 0.0}),// Terre
+        Vector<2>({-0.425, 0.0}),// Jupiter
+        Vector<2>({0.0, 0.0296})// Halley
     };
 
     // Univers cree uniforme, puis chaque corps recoit ses propres valeurs.
-    Univers univers(2, nombreCorps, 1.0, Vector(0, 0, 0));
+    Univers<2> univers(nombreCorps, 1.0, Vector<2>());
     for (int i = 0; i < nombreCorps; ++i) {
         univers.setPosition(static_cast<std::size_t>(i), positions[i]);
         univers.getParticule(static_cast<std::size_t>(i)).setMasse(masses[i]);

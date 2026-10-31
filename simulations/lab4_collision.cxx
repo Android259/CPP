@@ -2,6 +2,9 @@
 // pour Paraview. Parametres de l'enonce : L = 250x250, epsilon = 5, sigma = 1,
 // m = 1, v = (0,-10) pour le carre, 40x40 et 160x40 particules espacees de
 // 2^(1/6)*sigma, rayonCoupure = 2.5*sigma, dt = 0.00005, jusqu'a t = 19.5.
+//
+// Simulation planaire : Dim = 2 (toutes les positions/vitesses de l'enonce
+// ont une composante z nulle).
 
 #include "../include/Univers.hpp"
 #include <cmath>
@@ -11,13 +14,13 @@
 
 // Place un pave de nx*ny particules espacees de 'pas', a partir de l'indice
 // indiceDepart, coin bas-gauche (xMin, yMin), meme vitesse pour toutes.
-void placerGrille(Univers& univers, std::size_t indiceDepart,
+void placerGrille(Univers<2>& univers, std::size_t indiceDepart,
                   unsigned nx, unsigned ny, double pas,
-                  double xMin, double yMin, const Vector& vitesse) {
+                  double xMin, double yMin, const Vector<2>& vitesse) {
     for (unsigned j = 0; j < ny; ++j) {
         for (unsigned i = 0; i < nx; ++i) {
             std::size_t indice = indiceDepart + static_cast<std::size_t>(j*nx + i);
-            univers.setPosition(indice, Vector(xMin + i*pas, yMin + j*pas, 0.0));
+            univers.setPosition(indice, Vector<2>({xMin + i*pas, yMin + j*pas}));
             univers.getParticule(indice).setVitesse(vitesse);
         }
     }
@@ -29,7 +32,7 @@ int main() {
     const double epsilon = 5.0;
     const double sigma = 1.0;
     const double masse = 1.0;
-    const Vector vitesseCarre(0.0, -10.0, 0.0);
+    const Vector<2> vitesseCarre({0.0, -10.0});
     const unsigned N1x = 40, N1y = 40;    // carre : 1600 particules
     const unsigned N2x = 160, N2y = 40;   // rectangle : 6400 particules
     const double rcoup = 2.5*sigma;
@@ -40,14 +43,14 @@ int main() {
     const unsigned N2 = N2x*N2y;
     const unsigned N = N1 + N2;
 
-    Univers univers(2, static_cast<int>(N), masse, Vector(0, 0, 0),
-                    std::vector<double>{L1, L2}, rcoup, epsilon, sigma);
+    Univers<2> univers(static_cast<int>(N), masse, Vector<2>(),
+                    std::array<double, 2>{L1, L2}, rcoup, epsilon, sigma);
 
     // Rectangle immobile, en bas.
     double largeurRectangle = (N2x - 1)*pas;
     double xMinRectangle = (L1 - largeurRectangle) / 2.0;
     double yMinRectangle = 60.0;
-    placerGrille(univers, 0, N2x, N2y, pas, xMinRectangle, yMinRectangle, Vector(0, 0, 0));
+    placerGrille(univers, 0, N2x, N2y, pas, xMinRectangle, yMinRectangle, Vector<2>());
 
     // Carre au-dessus, qui tombe vers le rectangle.
     double largeurCarre = (N1x - 1)*pas;

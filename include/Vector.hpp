@@ -1,92 +1,86 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
+#include <array>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <initializer_list>
 #include <iostream>
 
-// Vecteur 3D (x, y, z) avec les operations arithmetiques de base.
+// Vecteur a Dim composantes avec les operations arithmetiques de base.
+// Dim est fixe a la compilation (contrairement a l'ancienne version 3D fixe
+// pilotee par un "dimension" runtime dans Univers/GrilleCellules) : un
+// Vector<1> n'a reellement qu'une composante, etc.
+template <std::size_t Dim>
 class Vector {
 private:
-    double x, y, z;
+    std::array<double, Dim> data;
 
 public:
-    // Constructeur par defaut : vecteur nul (0, 0, 0).
-    Vector() : x(0), y(0), z(0) {}
+    // Constructeur par defaut : vecteur nul.
+    Vector() { data.fill(0.0); }
 
-    // Constructeur a partir des trois coordonnees.
-    Vector(double x, double y, double z) :
-        x(x), y(y), z(z) {}
+    // Constructeur a partir d'une liste de Dim coordonnees, ex. Vector<3>{1.0, 2.0, 3.0}.
+    Vector(std::initializer_list<double> liste) {
+        assert(liste.size() == Dim);
+        std::size_t i = 0;
+        for (double v : liste) {
+            data[i++] = v;
+        }
+    }
 
-    // Destructeur par defaut (aucune ressource a liberer).
     ~Vector() = default;
+    Vector(const Vector& autre) = default;
+    Vector(Vector&& autre) noexcept = default;
+    Vector& operator=(const Vector& autre) = default;
+    Vector& operator=(Vector&& autre) noexcept = default;
 
-    // Constructeur par copie.
-    Vector(const Vector& autre) :
-        x(autre.x), y(autre.y), z(autre.z) {}
+    // Acces indexe en lecture (0 = premier axe, ..., Dim-1 = dernier axe).
+    double operator[](std::size_t i) const { return data[i]; }
 
-    // Constructeur de deplacement.
-    Vector(Vector&& autre) noexcept :
-        x(autre.x), y(autre.y), z(autre.z) {}
-
-    // Operateur d'affectation par copie.
-    Vector& operator=(const Vector& autre) {
-        if (this != &autre) {
-            x = autre.x; y = autre.y; z = autre.z;
-        }
-        return *this;
-    }
-
-    // Operateur d'affectation par deplacement.
-    Vector& operator=(Vector&& autre) noexcept {
-        if (this != &autre) {
-            x = autre.x; y = autre.y; z = autre.z;
-        }
-        return *this;
-    }
-
-    // Accesseurs en lecture pour chaque coordonnee.
-    double getX() const { return x; }
-    double getY() const { return y; }
-    double getZ() const { return z; }
-
-    // Acces indexe (0=x, 1=y, 2=z), pour le code generique en dimension
-    // (boucles for d in [0, dimension) sur les axes, cf. Univers).
-    double operator[](int i) const {
-        return i == 0 ? x : (i == 1 ? y : z);
-    }
+    // Accesseurs par composante usuels, valables pour Dim >= 1/2/3 respectivement
+    // (conserves pour compatibilite avec le cas 3D, le cas le plus frequent).
+    double getX() const { return data[0]; }
+    double getY() const { return data[1]; }
+    double getZ() const { return data[2]; }
 
     // Addition en place : ajoute 'autre' a ce vecteur.
     Vector& operator+=(const Vector& autre) {
-        x += autre.x; y += autre.y; z += autre.z;
+        for (std::size_t i = 0; i < Dim; ++i) data[i] += autre.data[i];
         return *this;
     }
 
     // Soustraction en place : soustrait 'autre' de ce vecteur.
     Vector& operator-=(const Vector& autre) {
-        x -= autre.x; y -= autre.y; z -= autre.z;
+        for (std::size_t i = 0; i < Dim; ++i) data[i] -= autre.data[i];
         return *this;
     }
 
     // Multiplication en place par le scalaire k.
     Vector& operator*=(double k) {
-        x *= k; y *= k; z *= k;
+        for (std::size_t i = 0; i < Dim; ++i) data[i] *= k;
         return *this;
     }
 
     // Division en place par le scalaire k.
     Vector& operator/=(double k) {
-        x /= k; y /= k; z /= k;
+        for (std::size_t i = 0; i < Dim; ++i) data[i] /= k;
         return *this;
     }
 
-    // Oppose du vecteur : (-x, -y, -z).
+    // Oppose du vecteur.
     Vector operator-() const {
-        return Vector(-x, -y, -z);
+        Vector resultat(*this);
+        for (std::size_t i = 0; i < Dim; ++i) resultat.data[i] = -resultat.data[i];
+        return resultat;
     }
 
     // Norme euclidienne du vecteur.
     double norm() const {
-        return std::sqrt(x*x + y*y + z*z);
+        double somme = 0.0;
+        for (std::size_t i = 0; i < Dim; ++i) somme += data[i]*data[i];
+        return std::sqrt(somme);
     }
 
     // Operateurs arithmetiques binaires (+, -, *, / entre vecteur et scalaire).
@@ -102,7 +96,10 @@ public:
 
     // Egalite / difference terme a terme.
     bool operator==(const Vector& autre) const {
-        return x == autre.x && y == autre.y && z == autre.z;
+        for (std::size_t i = 0; i < Dim; ++i) {
+            if (data[i] != autre.data[i]) return false;
+        }
+        return true;
     }
     bool operator!=(const Vector& autre) const {
         return !(*this == autre);
@@ -110,18 +107,25 @@ public:
 
     // Produit scalaire.
     double operator*(const Vector& autre) const {
-        return x*autre.x + y*autre.y + z*autre.z;
+        double somme = 0.0;
+        for (std::size_t i = 0; i < Dim; ++i) somme += data[i]*autre.data[i];
+        return somme;
     }
 
-    // Affichage sous la forme "(x, y, z)".
+    // Affichage sous la forme "(x, y, ...)".
     friend std::ostream& operator<<(std::ostream& os, const Vector& v) {
-        os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+        os << "(";
+        for (std::size_t i = 0; i < Dim; ++i) {
+            os << v.data[i];
+            if (i + 1 < Dim) os << ", ";
+        }
+        os << ")";
         return os;
     }
 
-    // Lecture depuis un flux : attend trois nombres "x y z".
+    // Lecture depuis un flux : attend Dim nombres.
     friend std::istream& operator>>(std::istream& is, Vector& v) {
-        is >> v.x >> v.y >> v.z;
+        for (std::size_t i = 0; i < Dim; ++i) is >> v.data[i];
         return is;
     }
 };

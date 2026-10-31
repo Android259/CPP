@@ -1,30 +1,30 @@
 #ifndef PARTICULE_HPP
 #define PARTICULE_HPP
 
-#include "../include/Vector.hpp"
+#include "Vector.hpp"
 
+template <std::size_t Dim>
 class Particule {
 private:
-    Vector position;
-    Vector vitesse;
+    Vector<Dim> position;
+    Vector<Dim> vitesse;
     double masse;
     double invMasse; // = 1.0 / masse, mise en cache pour eviter de diviser par masse a chaque pas de temps
     int id;
     int type;
-    Vector force;
+    Vector<Dim> force;
 
 public:
-    // Constructeur
+    // Constructeur a partir de la seule masse : position/vitesse/force nulles.
     Particule(double masse)
-        : position(0, 0, 0), vitesse(0, 0, 0), masse(masse), invMasse(1.0 / masse),
-          id(0), type(0), force(0, 0, 0) {}
+        : position(), vitesse(), masse(masse), invMasse(1.0 / masse),
+          id(0), type(0), force() {}
 
-    Particule(double x, double y, double z,
-              double vx, double vy, double vz,
-              double masse, int id, int type,
-              double fx, double fy, double fz)
-        : position(x, y, z), vitesse(vx, vy, vz), masse(masse), invMasse(1.0 / masse),
-          id(id), type(type), force(fx, fy, fz) {}
+    // Constructeur complet.
+    Particule(double masse, const Vector<Dim>& position, const Vector<Dim>& vitesse,
+              const Vector<Dim>& force, int id, int type)
+        : position(position), vitesse(vitesse), masse(masse), invMasse(1.0 / masse),
+          id(id), type(type), force(force) {}
 
     double getMasse() const { return masse; }
     void setMasse(double m) { masse = m; invMasse = 1.0 / m; }
@@ -44,20 +44,20 @@ public:
     void setType(int t) { type = t; }
 
     // Accesseurs vectoriels
-    const Vector& getPosition() const { return position; }
-    void setPosition(const Vector& p) { position = p; }
+    const Vector<Dim>& getPosition() const { return position; }
+    void setPosition(const Vector<Dim>& p) { position = p; }
 
-    const Vector& getVitesse() const { return vitesse; }
-    void setVitesse(const Vector& v) { vitesse = v; }
+    const Vector<Dim>& getVitesse() const { return vitesse; }
+    void setVitesse(const Vector<Dim>& v) { vitesse = v; }
 
-    const Vector& getForce() const { return force; }
-    void setForce(const Vector& f) { force = f; }
+    const Vector<Dim>& getForce() const { return force; }
+    void setForce(const Vector<Dim>& f) { force = f; }
 
     // Ajoute f a la force courante, sans passer par getForce()+setForce()
     // (evite de construire une copie intermediaire du vecteur force).
-    void ajouterForce(const Vector& f) { force += f; }
+    void ajouterForce(const Vector<Dim>& f) { force += f; }
 
-    // Accesseurs par composante, conserves pour compatibilite
+    // Accesseurs par composante, conserves pour compatibilite (valables pour Dim >= 1/2/3)
     double getX() const { return position.getX(); }
     double getY() const { return position.getY(); }
     double getZ() const { return position.getZ(); }

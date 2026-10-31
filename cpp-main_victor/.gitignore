@@ -1,0 +1,10 @@
+*.mp4
+collision.txt
+*.cmake
+*CMakeFiles*
+_deps*
+*CMakeCache.txt
+*Makefile
+*.json
+test/tests
+demo/demo_univers

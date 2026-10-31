@@ -24,11 +24,11 @@ double secondesDepuis(std::chrono::steady_clock::time_point debut) {
 }
 
 // Tire une particule aleatoire (masse, position et vitesse dans [0,1]).
-Particule particuleAleatoire(std::mt19937& mt, std::uniform_real_distribution<double>& dist, int id) {
+Particule<3> particuleAleatoire(std::mt19937& mt, std::uniform_real_distribution<double>& dist, int id) {
     double masse = 0.5 + dist(mt); // masse dans [0.5, 1.5], jamais nulle
-    Particule p(masse);
-    p.setPosition(Vector(dist(mt), dist(mt), dist(mt)));
-    p.setVitesse(Vector(dist(mt), dist(mt), dist(mt)));
+    Particule<3> p(masse);
+    p.setPosition(Vector<3>({dist(mt), dist(mt), dist(mt)}));
+    p.setVitesse(Vector<3>({dist(mt), dist(mt), dist(mt)}));
     p.setId(id);
     return p;
 }
@@ -36,10 +36,10 @@ Particule particuleAleatoire(std::mt19937& mt, std::uniform_real_distribution<do
 // Tire les n particules une fois pour toutes. Les quatre conteneurs recoivent
 // les memes, et le tirage reste hors du chronometre : la colonne "insertion"
 // ne mesure alors que l'insertion, pas la generation aleatoire.
-std::vector<Particule> tirerParticules(unsigned n) {
+std::vector<Particule<3>> tirerParticules(unsigned n) {
     std::mt19937 mt(42);
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    std::vector<Particule> source;
+    std::vector<Particule<3>> source;
     source.reserve(n);
     for (unsigned i = 0; i < n; ++i) {
         source.push_back(particuleAleatoire(mt, dist, static_cast<int>(i)));
@@ -48,10 +48,10 @@ std::vector<Particule> tirerParticules(unsigned n) {
 }
 
 // Mesure l'insertion puis le parcours repete, pour chacun des 4 conteneurs.
-// std::set exige un ordre sur ses elements : il utilise l'operator< de Particule.
+// std::set exige un ordre sur ses elements : il utilise l'operator< de Particule<3>.
 
-void mesurerVector(const std::vector<Particule>& source, unsigned repetitionsParcours) {
-    std::vector<Particule> conteneur;
+void mesurerVector(const std::vector<Particule<3>>& source, unsigned repetitionsParcours) {
+    std::vector<Particule<3>> conteneur;
     auto debut = std::chrono::steady_clock::now();
     for (const auto& p : source) {
         conteneur.push_back(p);
@@ -71,8 +71,8 @@ void mesurerVector(const std::vector<Particule>& source, unsigned repetitionsPar
                 "vector", tInsertion*1e6, tParcours*1e6, somme);
 }
 
-void mesurerDeque(const std::vector<Particule>& source, unsigned repetitionsParcours) {
-    std::deque<Particule> conteneur;
+void mesurerDeque(const std::vector<Particule<3>>& source, unsigned repetitionsParcours) {
+    std::deque<Particule<3>> conteneur;
     auto debut = std::chrono::steady_clock::now();
     for (const auto& p : source) {
         conteneur.push_back(p);
@@ -92,8 +92,8 @@ void mesurerDeque(const std::vector<Particule>& source, unsigned repetitionsParc
                 "deque", tInsertion*1e6, tParcours*1e6, somme);
 }
 
-void mesurerList(const std::vector<Particule>& source, unsigned repetitionsParcours) {
-    std::list<Particule> conteneur;
+void mesurerList(const std::vector<Particule<3>>& source, unsigned repetitionsParcours) {
+    std::list<Particule<3>> conteneur;
     auto debut = std::chrono::steady_clock::now();
     for (const auto& p : source) {
         conteneur.push_back(p);
@@ -113,8 +113,8 @@ void mesurerList(const std::vector<Particule>& source, unsigned repetitionsParco
                 "list", tInsertion*1e6, tParcours*1e6, somme);
 }
 
-void mesurerSet(const std::vector<Particule>& source, unsigned repetitionsParcours) {
-    std::set<Particule> conteneur;
+void mesurerSet(const std::vector<Particule<3>>& source, unsigned repetitionsParcours) {
+    std::set<Particule<3>> conteneur;
     auto debut = std::chrono::steady_clock::now();
     for (const auto& p : source) {
         conteneur.insert(p);
@@ -140,7 +140,7 @@ int main() {
     for (unsigned n = 64; n <= 8192; n *= 2) {
         std::printf("\nn = %u particules\n", n);
         const unsigned repetitions = 1000;
-        const std::vector<Particule> source = tirerParticules(n);
+        const std::vector<Particule<3>> source = tirerParticules(n);
 
         mesurerVector(source, repetitions);
         mesurerDeque(source, repetitions);

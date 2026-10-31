@@ -1,10 +1,10 @@
 #ifndef GRILLE_CELLULES_HPP
 #define GRILLE_CELLULES_HPP
 
-#include <vector>
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <vector>
 #include "Vector.hpp"
 #include "Particule.hpp"
 #include "Cellule.hpp"
@@ -14,21 +14,26 @@
 // proches lors du calcul d'un potentiel a courte portee (Question 3/4 lab4).
 // Classe technique (cf. Cours 05) : independante de la physique, separee de
 // Univers pour que chacune garde un objectif clair (forte cohesion).
+// Dim est fixe a la compilation : les tableaux par axe (nombreCellules,
+// tailleCellule, longueursCaracteristiques, coordonnees de cellule) sont des
+// std::array<_, Dim> plutot que des std::vector, pas d'allocation ni
+// d'indirection sur le tas (cf. coordonneeCellule/indiceLineaire, appeles a
+// chaque particule, a chaque pas).
+template <std::size_t Dim>
 class GrilleCellules {
 private:
-    int dimension;
-    std::vector<double> longueursCaracteristiques;
+    std::array<double, Dim> longueursCaracteristiques;
     double rayonCoupure;
 
-    std::vector<int> nombreCellules;  // nc_d = floor(L_d / rcoup), une valeur par dimension
-    std::vector<double> tailleCellule; // = longueursCaracteristiques[d] / nombreCellules[d], mis en cache (evite de le recalculer a chaque particule, a chaque pas, dans coordonneeCellule)
+    std::array<int, Dim> nombreCellules;  // nc_d = floor(L_d / rcoup), une valeur par dimension
+    std::array<double, Dim> tailleCellule; // = longueursCaracteristiques[d] / nombreCellules[d], mis en cache
     std::vector<Cellule> cellules;    // tableau linearise de taille nc_0*nc_1*... (1 par dimension absente)
     std::vector<std::size_t> celluleDeParticule; // celluleDeParticule[i] = cellule actuelle de la particule i
     std::vector<std::vector<std::size_t>> voisinsDeCellule; // voisinsDeCellule[iCell] = cellules voisines d'indice >= iCell, calcule une fois (cf. constructeur)
 
     // Calcule l'indice de cellule (coordonnee entiere) sur l'axe d pour la
     // composante donnee de la position, serre dans [0, nombreCellules[d]-1].
-    int coordonneeCellule(double composante, int d) const {
+    int coordonneeCellule(double composante, std::size_t d) const {
         int ic = static_cast<int>(std::floor(composante / tailleCellule[d]));
         if (ic < 0) ic = 0;
         if (ic >= nombreCellules[d]) ic = nombreCellules[d] - 1;
@@ -36,23 +41,22 @@ private:
     }
 
     // Coordonnees entieres (une par dimension) de la cellule contenant la
-    // position donnee. std::array plutot que std::vector : pas d'allocation
-    // (appelee a chaque particule, a chaque pas).
-    std::array<int, 3> coordonneesCellule(const Vector& position) const {
-        std::array<int, 3> coord{};
-        for (int d = 0; d < dimension; ++d) {
-            coord[static_cast<std::size_t>(d)] = coordonneeCellule(position[d], d);
+    // position donnee.
+    std::array<int, Dim> coordonneesCellule(const Vector<Dim>& position) const {
+        std::array<int, Dim> coord{};
+        for (std::size_t d = 0; d < Dim; ++d) {
+            coord[d] = coordonneeCellule(position[d], d);
         }
         return coord;
     }
 
     // Indice lineaire (dans 'cellules') correspondant a des coordonnees
-    // entieres de cellule, quel que soit dimension (1, 2 ou 3).
-    std::size_t indiceLineaire(const std::array<int, 3>& coord) const {
+    // entieres de cellule.
+    std::size_t indiceLineaire(const std::array<int, Dim>& coord) const {
         std::size_t indice = 0;
         std::size_t multiplicateur = 1;
-        for (int d = 0; d < dimension; ++d) {
-            indice += static_cast<std::size_t>(coord[static_cast<std::size_t>(d)])*multiplicateur;
+        for (std::size_t d = 0; d < Dim; ++d) {
+            indice += static_cast<std::size_t>(coord[d])*multiplicateur;
             multiplicateur *= static_cast<std::size_t>(nombreCellules[d]);
         }
         return indice;
@@ -60,10 +64,10 @@ private:
 
     // Inverse de indiceLineaire : coordonnees entieres de la cellule portant
     // l'indice lineaire donne.
-    std::array<int, 3> coordonneesDepuisIndice(std::size_t indice) const {
-        std::array<int, 3> coord{};
-        for (int d = 0; d < dimension; ++d) {
-            coord[static_cast<std::size_t>(d)] = static_cast<int>(indice % static_cast<std::size_t>(nombreCellules[d]));
+    std::array<int, Dim> coordonneesDepuisIndice(std::size_t indice) const {
+        std::array<int, Dim> coord{};
+        for (std::size_t d = 0; d < Dim; ++d) {
+            coord[d] = static_cast<int>(indice % static_cast<std::size_t>(nombreCellules[d]));
             indice /= static_cast<std::size_t>(nombreCellules[d]);
         }
         return coord;
@@ -71,21 +75,21 @@ private:
 
     // Indices lineaires des cellules voisines (elle incluse) d'une cellule
     // donnee par ses coordonnees entieres : decalage -1,0,1 sur chaque
-    // dimension active, sans periodicite.
-    std::vector<std::size_t> cellulesVoisinesDeCoord(const std::array<int, 3>& coord) const {
+    // dimension, sans periodicite.
+    std::vector<std::size_t> cellulesVoisinesDeCoord(const std::array<int, Dim>& coord) const {
         std::vector<std::size_t> voisins;
-        std::size_t maxVoisins = 1; // au plus 3^dimension (decalage -1,0,1 sur chaque axe) : evite les reallocations de push_back
-        for (int d = 0; d < dimension; ++d) maxVoisins *= 3;
+        std::size_t maxVoisins = 1; // au plus 3^Dim : evite les reallocations de push_back
+        for (std::size_t d = 0; d < Dim; ++d) maxVoisins *= 3;
         voisins.reserve(maxVoisins);
-        std::array<int, 3> decalage{-1, -1, -1};
+        std::array<int, Dim> decalage{};
+        decalage.fill(-1);
 
         while (true) {
-            std::array<int, 3> coordVoisin{};
+            std::array<int, Dim> coordVoisin{};
             bool valide = true;
-            for (int d = 0; d < dimension; ++d) {
-                std::size_t dd = static_cast<std::size_t>(d);
-                coordVoisin[dd] = coord[dd] + decalage[dd];
-                if (coordVoisin[dd] < 0 || coordVoisin[dd] >= nombreCellules[d]) {
+            for (std::size_t d = 0; d < Dim; ++d) {
+                coordVoisin[d] = coord[d] + decalage[d];
+                if (coordVoisin[d] < 0 || coordVoisin[d] >= nombreCellules[d]) {
                     valide = false;
                     break;
                 }
@@ -94,14 +98,14 @@ private:
                 voisins.push_back(indiceLineaire(coordVoisin));
             }
 
-            int d = 0;
-            while (d < dimension) {
-                ++decalage[static_cast<std::size_t>(d)];
-                if (decalage[static_cast<std::size_t>(d)] <= 1) break;
-                decalage[static_cast<std::size_t>(d)] = -1;
+            std::size_t d = 0;
+            while (d < Dim) {
+                ++decalage[d];
+                if (decalage[d] <= 1) break;
+                decalage[d] = -1;
                 ++d;
             }
-            if (d == dimension) break;
+            if (d == Dim) break;
         }
 
         return voisins;
@@ -110,13 +114,11 @@ private:
 public:
     // Construit la grille tensorielle (nc_d = floor(L_d / rcoup) cellules
     // par dimension) et precalcule le voisinage de chaque cellule (la
-    // topologie ne depend que de L/rcoup/dimension, pas des positions).
-    GrilleCellules(int dimension, const std::vector<double>& longueursCaracteristiques, double rayonCoupure)
-        : dimension(dimension), longueursCaracteristiques(longueursCaracteristiques), rayonCoupure(rayonCoupure) {
-        nombreCellules.assign(static_cast<std::size_t>(dimension), 0);
-        tailleCellule.assign(static_cast<std::size_t>(dimension), 0.0);
+    // topologie ne depend que de L/rcoup/Dim, pas des positions).
+    GrilleCellules(const std::array<double, Dim>& longueursCaracteristiques, double rayonCoupure)
+        : longueursCaracteristiques(longueursCaracteristiques), rayonCoupure(rayonCoupure) {
         std::size_t nombreTotalCellules = 1;
-        for (int d = 0; d < dimension; ++d) {
+        for (std::size_t d = 0; d < Dim; ++d) {
             int nc = static_cast<int>(std::floor(this->longueursCaracteristiques[d] / rayonCoupure));
             if (nc < 1) nc = 1; // au moins une cellule, meme si la boite est plus petite que rcoup
             nombreCellules[d] = nc;
@@ -126,9 +128,8 @@ public:
         cellules.assign(nombreTotalCellules, Cellule());
 
         // Chaque paire de cellules voisines ne doit etre traitee qu'une
-        // fois (cf. recalculerForcesLennardJones) : on ne garde ici que les
-        // voisins d'indice >= iCell, le filtre jCell < iCell n'a donc plus
-        // besoin d'etre refait a chaque pas dans Univers.
+        // fois (cf. Univers::recalculerForcesLennardJones) : on ne garde ici
+        // que les voisins d'indice >= iCell.
         voisinsDeCellule.resize(nombreTotalCellules);
         for (std::size_t iCell = 0; iCell < nombreTotalCellules; ++iCell) {
             std::vector<std::size_t> tous = cellulesVoisinesDeCoord(coordonneesDepuisIndice(iCell));
@@ -144,7 +145,7 @@ public:
     // Placement initial : pas de cellule precedente, chaque particule est
     // simplement ajoutee a la cellule de sa position courante. A appeler une
     // fois les positions initiales fixees.
-    void placerParticules(const std::vector<Particule>& particules) {
+    void placerParticules(const std::vector<Particule<Dim>>& particules) {
         celluleDeParticule.assign(particules.size(), 0);
 
         // Reserve une capacite basee sur la densite moyenne (marge x2 pour
@@ -167,9 +168,8 @@ public:
     // Replace chaque particule dans la cellule correspondant a sa position
     // courante (a rappeler apres chaque pas de temps). Cell-list
     // incrementale : ne touche qu'aux particules qui ont effectivement
-    // change de cellule depuis le dernier appel (celluleDeParticule sert de
-    // cache pour le detecter en O(1) par particule).
-    void mettreAJour(const std::vector<Particule>& particules) {
+    // change de cellule depuis le dernier appel.
+    void mettreAJour(const std::vector<Particule<Dim>>& particules) {
         for (std::size_t i = 0; i < particules.size(); ++i) {
             std::size_t nouvelleCellule = indiceLineaire(coordonneesCellule(particules[i].getPosition()));
             std::size_t ancienneCellule = celluleDeParticule[i];
@@ -193,7 +193,7 @@ public:
 
     // Indices lineaires des cellules voisines (elle incluse) de la cellule
     // contenant 'position'.
-    std::vector<std::size_t> cellulesVoisines(const Vector& position) const {
+    std::vector<std::size_t> cellulesVoisines(const Vector<Dim>& position) const {
         return cellulesVoisinesDeCoord(coordonneesCellule(position));
     }
 };

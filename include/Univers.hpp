@@ -1,24 +1,27 @@
 #ifndef UNIVERS_HPP
 #define UNIVERS_HPP
 
-#include <vector>
+#include <array>
+#include <cmath>
 #include <iostream>
 #include <string>
-#include <cmath>
+#include <vector>
 #include "Particule.hpp"
 #include "Cellule.hpp"
 #include "GrilleCellules.hpp"
 #include "ExportateurVTK.hpp"
 
 // Univers : une collection de particules evoluant par interaction gravitationnelle
+// ou de Lennard-Jones, dans un espace de dimension Dim fixee a la compilation
+// (1, 2 ou 3, voire plus : rien dans l'implementation ne suppose Dim <= 3).
+template <std::size_t Dim>
 class Univers {
 private:
-    int dimension;// 1, 2 ou 3
-    std::vector<Particule> particules;
-    std::vector<Vector> forceAncienne; // tampon reutilise par avancer/avancerLennardJones (evite une allocation par pas)
+    std::vector<Particule<Dim>> particules;
+    std::vector<Vector<Dim>> forceAncienne; // tampon reutilise par avancer/avancerLennardJones (evite une allocation par pas)
 
     // Contraintes physiques de l'univers (Question 2) :
-    std::vector<double> longueursCaracteristiques; // L_d, une valeur par dimension (taille de la boite)
+    std::array<double, Dim> longueursCaracteristiques; // L_d, une valeur par dimension (taille de la boite)
     double rayonCoupure;// dehors, le potentiel est negligeable
     double epsilon;// profondeur du potentiel de Lennard-Jones
     double sigma;// echelle de longueur du potentiel de Lennard-Jones
@@ -27,26 +30,26 @@ private:
 
     // Grille tensorielle de cellules (Question 3), classe technique separee
     // (cf. Cours 05 - architecture en couches / forte cohesion) :
-    GrilleCellules grille;
+    GrilleCellules<Dim> grille;
 
     // Calcule la force gravitationnelle entre i et j et l'accumule dans
     // force[i] et force[j] (Fji = -Fij).
     void ajouterForceGravitationnelle(std::size_t i, std::size_t j) {
-        Vector d = particules[j].getPosition() - particules[i].getPosition();
+        Vector<Dim> d = particules[j].getPosition() - particules[i].getPosition();
         double r2 = d*d; // produit scalaire d*d = r^2, sans recalcul
         double r = std::sqrt(r2);
         double Fij = particules[i].getMasse()*particules[j].getMasse() / (r2*r);
 
-        Vector force = d*Fij;
+        Vector<Dim> force = d*Fij;
         particules[i].ajouterForce(force);
         particules[j].ajouterForce(-force);
     }
 
     // Calcule la force de Lennard-Jones entre i et j et l'accumule dans
     // force[i] et force[j], seulement si r <= rayonCoupure (sinon le
-    // potentiel est neglige). F(r) = 24*epsilon/r^2 *(2*(sigma/r)^12 - (sigma/r)^6) ; 
+    // potentiel est neglige). F(r) = 24*epsilon/r^2 *(2*(sigma/r)^12 - (sigma/r)^6) ;
     void ajouterForceLennardJones(std::size_t i, std::size_t j) {
-        Vector d = particules[j].getPosition() - particules[i].getPosition();
+        Vector<Dim> d = particules[j].getPosition() - particules[i].getPosition();
         double r2 = d*d;
         if (r2 > rayonCoupureCarre || r2 == 0.0) {
             return;
@@ -56,38 +59,39 @@ private:
         double sr12 = sr6*sr6;
         double intensite = 24.0*epsilon / r2*(2.0*sr12 - sr6); // = F(r)/r
 
-        Vector force = d*intensite;
+        Vector<Dim> force = d*intensite;
         particules[i].ajouterForce(-force);
         particules[j].ajouterForce(force);
     }
 
+    // Longueurs caracteristiques par defaut (boite de cote 1 dans chaque dimension).
+    static std::array<double, Dim> longueursParDefaut() {
+        std::array<double, Dim> L;
+        L.fill(1.0);
+        return L;
+    }
+
 public:
     // Construit un univers de n particules uniformes (meme masse, meme
-    // vitesse initiale.
-
+    // vitesse initiale).
     // Conserve pour compatibilite avec les sessions precedentes (Lab3) :
     // delegue vers le constructeur complet avec des contraintes par defaut
     // (boite de cote 1 dans chaque dimension, rcoup = epsilon = sigma = 1).
-    Univers(int dimension, int n, double masse, const Vector& vitesseInitiale):
-                Univers(dimension, n, masse, vitesseInitiale,
-                std::vector<double>(static_cast<std::size_t>(dimension), 1.0),
-                1.0, 1.0, 1.0) {}
+    Univers(int n, double masse, const Vector<Dim>& vitesseInitiale):
+                Univers(n, masse, vitesseInitiale, longueursParDefaut(), 1.0, 1.0, 1.0) {}
 
     // Constructeur complet (Question 2 lab 4) : ajoute les contraintes physiques de
-    // l'univers dimension, longueurs caracteristiques par dimension (L),
-    // rayon de coupure (rcoup) et constantes du potentiel de Lennard-Jones
-    // (epsilon, sigma). Fonctionne pour dimension = 1, 2 ou 3 : L doit
-    // contenir exactement 'dimension' valeurs (une par axe utilise).
-    Univers(int dimension, int n, double masse, const Vector& vitesseInitiale,
-            const std::vector<double>& L, double rcoup, double epsilon, double sigma):
-            dimension(dimension),
+    // l'univers : longueurs caracteristiques par dimension (L), rayon de
+    // coupure (rcoup) et constantes du potentiel de Lennard-Jones (epsilon, sigma).
+    Univers(int n, double masse, const Vector<Dim>& vitesseInitiale,
+            const std::array<double, Dim>& L, double rcoup, double epsilon, double sigma):
             longueursCaracteristiques(L), rayonCoupure(rcoup),
             epsilon(epsilon), sigma(sigma),
             rayonCoupureCarre(rcoup*rcoup), sigmaCarre(sigma*sigma),
-            grille(dimension, L, rcoup) {
+            grille(L, rcoup) {
         particules.reserve(n);
         for (int i = 0; i < n; ++i) {
-            Particule p(masse);
+            Particule<Dim> p(masse);
             p.setVitesse(vitesseInitiale);
             p.setId(i);
             particules.push_back(p);
@@ -95,15 +99,15 @@ public:
         forceAncienne.resize(particules.size());
     }
 
-    int getDimension() const { return dimension; }
+    static constexpr std::size_t getDimension() { return Dim; }
     int getNombreParticules() const { return static_cast<int>(particules.size()); }
-    const std::vector<Particule>& getParticules() const { return particules; }
-    Particule& getParticule(std::size_t i) { return particules[i]; }
+    const std::vector<Particule<Dim>>& getParticules() const { return particules; }
+    Particule<Dim>& getParticule(std::size_t i) { return particules[i]; }
 
-    // Longueur caracteristique (taille de la boite) le long de l'axe d
-    // (0 = x, 1 = y, 2 = z). d doit etre < dimension.
+    // Longueur caracteristique (taille de la boite) le long de l'axe d.
+    // d doit etre < Dim.
     double getLongueurCaracteristique(std::size_t d) const { return longueursCaracteristiques[d]; }
-    const std::vector<double>& getLongueursCaracteristiques() const { return longueursCaracteristiques; }
+    const std::array<double, Dim>& getLongueursCaracteristiques() const { return longueursCaracteristiques; }
 
     double getRayonCoupure() const { return rayonCoupure; }
     double getEpsilon() const { return epsilon; }
@@ -130,14 +134,14 @@ public:
 
     // Indices lineaires (dans getCellules()) des cellules voisines de la
     // cellule contenant 'position' (elle incluse) : decalage de -1, 0, +1
-    // sur chaque dimension active, sans periodicite (3 voisins en 1D,
+    // sur chaque dimension, sans periodicite (3 voisins en 1D,
     // 9 en 2D, 27 en 3D pour une cellule interieure ; moins en bordure).
-    std::vector<std::size_t> cellulesVoisines(const Vector& position) const {
+    std::vector<std::size_t> cellulesVoisines(const Vector<Dim>& position) const {
         return grille.cellulesVoisines(position);
     }
 
     // Permet de placer la particule i (positions initiales distinctes).
-    void setPosition(std::size_t i, const Vector& position) {
+    void setPosition(std::size_t i, const Vector<Dim>& position) {
         particules[i].setPosition(position);
     }
 
@@ -145,7 +149,7 @@ public:
     // les paires de particules.
     void recalculerForces() {
         for (auto& p : particules) {
-            p.setForce(Vector(0, 0, 0));
+            p.setForce(Vector<Dim>());
         }
         for (std::size_t i = 0; i < particules.size(); ++i) {
             for (std::size_t j = i + 1; j < particules.size(); ++j) {
@@ -160,9 +164,8 @@ public:
     // deja ete appele et que les cellules sont a jour (cf. mettreAJourCellules).
     void recalculerForcesLennardJones() {
         for (auto& p : particules) {
-            p.setForce(Vector(0, 0, 0));
+            p.setForce(Vector<Dim>());
         }
-
         const auto& cellules = grille.getCellules();
         for (std::size_t iCell = 0; iCell < cellules.size(); ++iCell) {
             const auto& voisins = grille.voisinsDe(iCell);
@@ -195,12 +198,11 @@ public:
         for (std::size_t i = 0; i < particules.size(); ++i) {
             forceAncienne[i] = particules[i].getForce();
         }
-
         // Positions : x(t+dt) = x(t) + dt*v(t) + dt^2/(2m)*F(t)
         double demiDt2 = 0.5*dt*dt; // ne depend pas de i, calcule une seule fois
         for (std::size_t i = 0; i < particules.size(); ++i) {
             double invM = particules[i].getInvMasse();
-            Vector nouvellePosition = particules[i].getPosition()
+            Vector<Dim> nouvellePosition = particules[i].getPosition()
                                     + dt*particules[i].getVitesse()
                                     + (demiDt2*invM)*forceAncienne[i];
             particules[i].setPosition(nouvellePosition);
@@ -212,15 +214,15 @@ public:
         double demiDt = 0.5*dt; // ne depend pas de i, calcule une seule fois
         for (std::size_t i = 0; i < particules.size(); ++i) {
             double invM = particules[i].getInvMasse();
-            Vector nouvelleVitesse = particules[i].getVitesse()
-                                    + (demiDt*invM)*(forceAncienne[i] 
+            Vector<Dim> nouvelleVitesse = particules[i].getVitesse()
+                                    + (demiDt*invM)*(forceAncienne[i]
                                     + particules[i].getForce());
             particules[i].setVitesse(nouvelleVitesse);
         }
     }
 
-    // Fait avancer l'univers d'un pas de temps dt avec le potentiel de Lennard-Jones, 
-    // en utilisant la grille de cellules pour restreindre le calcul de force aux paires 
+    // Fait avancer l'univers d'un pas de temps dt avec le potentiel de Lennard-Jones,
+    // en utilisant la grille de cellules pour restreindre le calcul de force aux paires
     // voisines (Question 4) et en remettant les particules a jour dans les cellules
     // a chaque pas (Question 5). A appeler apres initialiserCellules().
     void avancerLennardJones(double dt) {
@@ -231,7 +233,7 @@ public:
         double demiDt2 = 0.5*dt*dt;
         for (std::size_t i = 0; i < particules.size(); ++i) {
             double invM = particules[i].getInvMasse();
-            Vector nouvellePosition = particules[i].getPosition()
+            Vector<Dim> nouvellePosition = particules[i].getPosition()
                                     + dt*particules[i].getVitesse()
                                     + (demiDt2*invM)*forceAncienne[i];
             particules[i].setPosition(nouvellePosition);
@@ -243,7 +245,7 @@ public:
         double demiDt = 0.5*dt;
         for (std::size_t i = 0; i < particules.size(); ++i) {
             double invM = particules[i].getInvMasse();
-            Vector nouvelleVitesse = particules[i].getVitesse()
+            Vector<Dim> nouvelleVitesse = particules[i].getVitesse()
                                     + (demiDt*invM)*(forceAncienne[i]
                                     + particules[i].getForce());
             particules[i].setVitesse(nouvelleVitesse);
