@@ -19,6 +19,23 @@ TEST(UniversTest, ConstructeurSimplifie) {
     }
 }
 
+TEST(UniversTest, ConstructeurAPartirDUneListeDeParticulesHeterogenes) {
+    // Chaque particule garde sa propre masse/position/vitesse : pas besoin
+    // de construire un univers uniforme puis de corriger chaque particule.
+    std::vector<Particule<2>> liste = {
+        Particule<2>(1.0, Vector<2>({0.0, 0.0}), Vector<2>({0.0, 0.0}), Vector<2>(), 0, 0),
+        Particule<2>(2.0, Vector<2>({3.0, 4.0}), Vector<2>({1.0, 0.0}), Vector<2>(), 1, 0)
+    };
+    Univers<2> u(liste, std::array<double, 2>{10.0, 10.0}, 2.0, 1.0, 1.0);
+
+    ASSERT_EQ(u.getNombreParticules(), 2);
+    EXPECT_DOUBLE_EQ(u.getParticule(0).getMasse(), 1.0);
+    EXPECT_DOUBLE_EQ(u.getParticule(1).getMasse(), 2.0);
+    EXPECT_EQ(u.getParticule(1).getPosition(), Vector<2>({3.0, 4.0}));
+    EXPECT_EQ(u.getParticule(1).getVitesse(), Vector<2>({1.0, 0.0}));
+    EXPECT_EQ(u.getParticule(1).getId(), 1);
+}
+
 TEST(UniversTest, ConstructeurCompletMemoriseLesContraintes) {
     Univers<2> u(2, 1.0, Vector<2>(), std::array<double, 2>{10.0, 20.0}, 2.5, 5.0, 1.0);
     EXPECT_DOUBLE_EQ(u.getLongueurCaracteristique(0), 10.0);

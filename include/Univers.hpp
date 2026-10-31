@@ -99,6 +99,21 @@ public:
         forceAncienne.resize(particules.size());
     }
 
+    // Construit un univers a partir d'une liste de particules deja prete
+    // (masse/position/vitesse/id quelconques pour chacune), plutot que de
+    // les construire toutes identiques a l'interieur de Univers. Separe la
+    // creation des particules (systeme heterogene, ex. systeme solaire) de
+    // la logique de Univers.
+    Univers(const std::vector<Particule<Dim>>& listeParticules,
+            const std::array<double, Dim>& L, double rcoup, double epsilon, double sigma):
+            particules(listeParticules),
+            longueursCaracteristiques(L), rayonCoupure(rcoup),
+            epsilon(epsilon), sigma(sigma),
+            rayonCoupureCarre(rcoup*rcoup), sigmaCarre(sigma*sigma),
+            grille(L, rcoup) {
+        forceAncienne.resize(particules.size());
+    }
+
     static constexpr std::size_t getDimension() { return Dim; }
     int getNombreParticules() const { return static_cast<int>(particules.size()); }
     const std::vector<Particule<Dim>>& getParticules() const { return particules; }

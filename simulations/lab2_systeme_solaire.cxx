@@ -35,29 +35,17 @@ int main() {
     const double dt = 0.015;
     const double tFinal = 468.5;
 
-    // Quatre corps, masses et etats initiaux donnes par l'enonce.
-    const int nombreCorps = 4;
-    const double masses[nombreCorps] = {1.0, 3.0e-6, 9.55e-4, 1.0e-14};
-    const Vector<2> positions[nombreCorps] = {
-        Vector<2>({0.0, 0.0}),// Soleil
-        Vector<2>({0.0, 1.0}),// Terre
-        Vector<2>({0.0, 5.36}),// Jupiter
-        Vector<2>({34.75, 0.0})// Halley
-    };
-    const Vector<2> vitesses[nombreCorps] = {
-        Vector<2>({0.0, 0.0}),// Soleil
-        Vector<2>({-1.0, 0.0}),// Terre
-        Vector<2>({-0.425, 0.0}),// Jupiter
-        Vector<2>({0.0, 0.0296})// Halley
+    // Quatre corps, masses et etats initiaux donnes par l'enonce. Chaque
+    // particule est construite directement avec ses propres valeurs (masse,
+    // position, vitesse) : pas de corps "generique" a corriger ensuite.
+    std::vector<Particule<2>> corps = {
+        Particule<2>(1.0, Vector<2>({0.0, 0.0}), Vector<2>({0.0, 0.0}), Vector<2>(), 0, 0),      // Soleil
+        Particule<2>(3.0e-6, Vector<2>({0.0, 1.0}), Vector<2>({-1.0, 0.0}), Vector<2>(), 1, 0),  // Terre
+        Particule<2>(9.55e-4, Vector<2>({0.0, 5.36}), Vector<2>({-0.425, 0.0}), Vector<2>(), 2, 0), // Jupiter
+        Particule<2>(1.0e-14, Vector<2>({34.75, 0.0}), Vector<2>({0.0, 0.0296}), Vector<2>(), 3, 0) // Halley
     };
 
-    // Univers cree uniforme, puis chaque corps recoit ses propres valeurs.
-    Univers<2> univers(nombreCorps, 1.0, Vector<2>());
-    for (int i = 0; i < nombreCorps; ++i) {
-        univers.setPosition(static_cast<std::size_t>(i), positions[i]);
-        univers.getParticule(static_cast<std::size_t>(i)).setMasse(masses[i]);
-        univers.getParticule(static_cast<std::size_t>(i)).setVitesse(vitesses[i]);
-    }
+    Univers<2> univers(corps, std::array<double, 2>{1.0, 1.0}, 1.0, 1.0, 1.0);
 
     const std::vector<std::string> noms = {"Soleil", "Terre", "Jupiter", "Halley"};
     std::ofstream fichier("systeme_solaire.txt");
