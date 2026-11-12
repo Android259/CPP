@@ -10,3 +10,6 @@ potentiel_lj.txt
 
 # Fichiers de profilage
 gmon.out
+
+# Nouvelle version du projet : depot git separe (gitlab.ensimag.fr/filipev/cpp)
+cpp-main_new/
